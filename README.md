@@ -1,4 +1,37 @@
-<build>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.health.mtp</groupId>
+        <artifactId>mtp-api</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.health.mtp</groupId>
+    <artifactId>mtp-ehr-model</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.9</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
+    </dependencies>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -25,15 +58,15 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${basedir}/src/main/resources/post_booking_service_model.yaml</inputSpec>
+                            <inputSpec>${basedir}/src/main/resources/mtp-ehr-model.yaml</inputSpec>
                             <language>java</language>
                             <output>${project.build.directory}/generated-sources/</output>
                             <generateSupportingFiles>false</generateSupportingFiles>
-                            <modelPackage>com.americanexpress.pzn.model.tripsummary.model</modelPackage>
+                            <modelPackage>com.mtp.ehr.model</modelPackage>
                             <generateApis>false</generateApis>
                             <configOptions>
                                 <sourceFolder>/</sourceFolder>
-                                <dateLibrary>java17</dateLibrary>
+                                <dateLibrary>java21</dateLibrary>
                                 <identifierNamingConvention>original</identifierNamingConvention>
                             </configOptions>
                         </configuration>
@@ -52,3 +85,4 @@
             </plugin>
         </plugins>
     </build>
+</project>

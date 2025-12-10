@@ -1,0 +1,441 @@
+openapi: 3.0.3
+info:
+  title: Healthcare FHIR API
+  version: 1.0.0
+  description: >
+    Simple FHIR R4-based API for patient demographics, appointments, and encounters.
+
+servers:
+  - url: https://api.example.com
+
+paths:
+  /fhir/Patient/{id}:
+    get:
+      summary: Get a Patient by ID
+      operationId: getPatientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: FHIR Patient resource ID
+      responses:
+        '200':
+          description: Patient found
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '404':
+          description: Patient not found
+
+  /fhir/Patient:
+    get:
+      summary: Search / list Patients
+      description: >
+        FHIR-compliant Patient search. Returns a Bundle of Patient resources.
+      operationId: searchPatients
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by patient name (family or given)
+        - name: family
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by family (last) name
+        - name: given
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by given (first) name
+        - name: identifier
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by identifier (e.g. MRN)
+        - name: active
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by active flag
+        - name: _count
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Page size (FHIR standard parameter)
+      responses:
+        '200':
+          description: Bundle of Patient resources
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Bundle'
+
+    post:
+      summary: Create or update a Patient
+      operationId: createPatient
+      requestBody:
+        required: true
+        content:
+          application/fhir+json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+      responses:
+        '201':
+          description: Patient created
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+
+  /fhir/Appointment/{id}:
+    get:
+      summary: Get an Appointment by ID
+      operationId: getAppointmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: FHIR Appointment resource ID
+      responses:
+        '200':
+          description: Appointment found
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '404':
+          description: Appointment not found
+
+  /fhir/Appointment:
+    post:
+      summary: Create or update an Appointment
+      operationId: createAppointment
+      requestBody:
+        required: true
+        content:
+          application/fhir+json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '201':
+          description: Appointment created
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  /fhir/Encounter/{id}:
+    get:
+      summary: Get an Encounter by ID
+      operationId: getEncounterById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: FHIR Encounter resource ID
+      responses:
+        '200':
+          description: Encounter found
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+        '404':
+          description: Encounter not found
+
+  /fhir/Encounter:
+    post:
+      summary: Create or update an Encounter
+      operationId: createEncounter
+      requestBody:
+        required: true
+        content:
+          application/fhir+json:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+      responses:
+        '201':
+          description: Encounter created
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+
+components:
+  schemas:
+    # --- FHIR Bundle (simplified for search results) ---
+    Bundle:
+      type: object
+      required:
+        - resourceType
+        - type
+      properties:
+        resourceType:
+          type: string
+          enum: [Bundle]
+        type:
+          type: string
+          description: For search results, usually 'searchset'.
+        total:
+          type: integer
+          description: Total number of matching resources (if known).
+        entry:
+          type: array
+          description: List of matching resources.
+          items:
+            type: object
+            properties:
+              fullUrl:
+                type: string
+              resource:
+                $ref: '#/components/schemas/Patient'
+              search:
+                type: object
+                properties:
+                  mode:
+                    type: string
+                    description: match | include | outcome
+
+    # --- PATIENT (Simplified FHIR R4 Patient) ---
+    Patient:
+      type: object
+      required:
+        - resourceType
+      properties:
+        resourceType:
+          type: string
+          enum: [Patient]
+        id:
+          type: string
+          description: Logical id of this artifact
+        identifier:
+          type: array
+          items:
+            type: object
+            properties:
+              use:
+                type: string
+              system:
+                type: string
+              value:
+                type: string
+        active:
+          type: boolean
+        name:
+          type: array
+          items:
+            type: object
+            properties:
+              use:
+                type: string
+              family:
+                type: string
+              given:
+                type: array
+                items:
+                  type: string
+        telecom:
+          type: array
+          items:
+            type: object
+            properties:
+              system:
+                type: string
+                description: phone | fax | email | pager | url | sms | other
+              value:
+                type: string
+              use:
+                type: string
+        gender:
+          type: string
+          enum: [male, female, other, unknown]
+        birthDate:
+          type: string
+          format: date
+        address:
+          type: array
+          items:
+            type: object
+            properties:
+              use:
+                type: string
+              type:
+                type: string
+              line:
+                type: array
+                items:
+                  type: string
+              city:
+                type: string
+              state:
+                type: string
+              postalCode:
+                type: string
+              country:
+                type: string
+
+    # --- APPOINTMENT (Simplified FHIR R4 Appointment) ---
+    Appointment:
+      type: object
+      required:
+        - resourceType
+        - status
+        - participant
+      properties:
+        resourceType:
+          type: string
+          enum: [Appointment]
+        id:
+          type: string
+        status:
+          type: string
+          description: proposed | pending | booked | arrived | fulfilled | cancelled | noshow | entered-in-error | checked-in | waitlist
+        serviceCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              coding:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    system:
+                      type: string
+                    code:
+                      type: string
+                    display:
+                      type: string
+        serviceType:
+          type: array
+          items:
+            type: object
+            properties:
+              coding:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    system:
+                      type: string
+                    code:
+                      type: string
+                    display:
+                      type: string
+        specialty:
+          type: array
+          items:
+            type: object
+            properties:
+              coding:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    system:
+                      type: string
+                    code:
+                      type: string
+                    display:
+                      type: string
+        appointmentType:
+          type: object
+          properties:
+            coding:
+              type: array
+              items:
+                type: object
+                properties:
+                  system:
+                    type: string
+                  code:
+                    type: string
+                  display:
+                    type: string
+        reasonCode:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+        description:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        participant:
+          type: array
+          items:
+            type: object
+            properties:
+              actor:
+                type: object
+                properties:
+                  reference:
+                    type: string
+                    description: Reference to Patient/Practitioner/Location, etc.
+                  display:
+                    type: string
+              status:
+                type: string
+                description: accepted | declined | tentative | needs-action
+
+    # --- ENCOUNTER (Simplified FHIR R4 Encounter) ---
+    Encounter:
+      type: object
+      required:
+        - resourceType
+        - status
+      properties:
+        resourceType:
+          type: string
+          enum: [Encounter]
+        id:
+          type: string
+        status:
+          type: string
+          description: planned | in-progress | onhold | completed | cancelled | entered-in-error | unknown
+        class:
+          type: object
+          properties:
+            system:
+              type: string
+            code:
+              type: string
+            display:
+              type: string
+        subject:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Reference to Patient
+            display:
+              type: string
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
